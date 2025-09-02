@@ -256,7 +256,7 @@ local floor3Paths = {
 -- Modified: will retry the entire teleport up to 2 more times (total 3 attempts) if final placement fails.
 local function teleportDynamic(fromPos, toPos, fast, retryCount)
     retryCount = retryCount or 0
-    if retryCount > 2 then return end -- don't retry more than 2 extra times
+    if retryCount > 3 then return end -- don't retry more than 2 extra times
 
     if fast == nil then fast = true end
     if not Character or not Character.PrimaryPart then return end
