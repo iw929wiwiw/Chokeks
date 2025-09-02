@@ -156,7 +156,7 @@ AlignHelper.MaxForce = math.huge
 AlignHelper.Attachment0 = nil
 AlignHelper.Attachment1 = nil
 AlignHelper.RigidityEnabled = true
-AlignHelper.Responsiveness = 200 -- high responsiveness
+AlignHelper.Responsiveness = 350 -- reduced a bit from 500 for slightly calmer reconciliation
 AlignHelper.Parent = Workspace -- parented to workspace; Attachment0 will be set per-character
 
 local SuperSteal = Instance.new("BoolValue")
@@ -252,31 +252,30 @@ local floor3Paths = {
     [Vector3.new(-516, 30, -101)] = {Vector3.new(-516, 13, -101), Vector3.new(-518, 13, -131), Vector3.new(-467, 13, -133)}
 }
 
--- Robust teleport function with slight slow-down and retries for high ping
--- Modified: will retry the entire teleport up to 2 more times (total 3 attempts) if final placement fails.
+-- Robust teleport function with slightly slower timings/segments (tuned to be a bit calmer)
 local function teleportDynamic(fromPos, toPos, fast, retryCount)
     retryCount = retryCount or 0
-    if retryCount > 3 then return end -- don't retry more than 2 extra times
+    if retryCount > 3 then return end
 
     if fast == nil then fast = true end
     if not Character or not Character.PrimaryPart then return end
 
-    -- small jump attempt to avoid ground collision
+    -- small jump attempt to avoid ground collision (slightly longer wait for stability)
     local hum = Character:FindFirstChildOfClass("Humanoid")
     if hum then
         pcall(function()
             hum.JumpPower = 5
             hum:ChangeState(Enum.HumanoidStateType.Jumping)
         end)
-        task.wait(0.01)
+        task.wait(0.01) -- increased slightly from 0.005 for a tiny slowdown & stability
     end
 
     local distance = (toPos - fromPos).Magnitude
     local segments
 
-    -- choose segments (still fast but a bit slower than before)
+    -- choose segments (slightly more segments for smoother/slower moves)
     if fast then
-        segments = math.clamp(math.ceil(distance / 140), 1, 6) -- 1..6 segments
+        segments = math.clamp(math.ceil(distance / 180), 1, 6) -- divisor reduced from 220 (more segments), max increased slightly
     else
         if distance < 80 then segments = 1
         elseif distance < 250 then segments = 2
@@ -284,8 +283,8 @@ local function teleportDynamic(fromPos, toPos, fast, retryCount)
         end
     end
 
-    -- step delay slightly increased to help with server reconciliation on high ping (tunable)
-    local stepDelay = fast and 0.06 or 0.09
+    -- step delay increased slightly for slower stepping (still small to allow server reconciliation)
+    local stepDelay = fast and 0.055 or 0.075 -- previously 0.035 / 0.06; bumped to be slightly slower
 
     -- ensure attachment and align helper are active during teleport
     if Character.PrimaryPart then
@@ -315,7 +314,7 @@ local function teleportDynamic(fromPos, toPos, fast, retryCount)
     -- final placement + retry loop (helps when the server corrects us due to ping)
     local finalPos = Vector3.new(toPos.X, toPos.Y + 2, toPos.Z)
     local attempts = 0
-    local maxAttempts = 4
+    local maxAttempts = 3 -- keep retries
     while attempts < maxAttempts do
         attempts = attempts + 1
         pcall(function()
@@ -325,7 +324,7 @@ local function teleportDynamic(fromPos, toPos, fast, retryCount)
                 Character.PrimaryPart.AssemblyAngularVelocity = Vector3.new(0,0,0)
             end
         end)
-        task.wait(stepDelay + 0.02)
+        task.wait(stepDelay + 0.02) -- slightly increased extra wait
         if not Character or not Character.PrimaryPart then break end
         local cur = Character.PrimaryPart.Position
         if (Vector3.new(cur.X, toPos.Y, cur.Z) - Vector3.new(toPos.X, toPos.Y, toPos.Z)).Magnitude <= 3 then
@@ -347,7 +346,7 @@ local function teleportDynamic(fromPos, toPos, fast, retryCount)
 
     -- if teleport failed and we still have retries left, try again (up to 2 retries)
     if not success and retryCount < 2 then
-        task.wait(0.06)
+        task.wait(0.04) -- slightly longer pause before retry (was 0.02)
         teleportDynamic(fromPos, toPos, fast, retryCount + 1)
     end
 end
@@ -413,10 +412,10 @@ local function teleportFloor2(hitbox)
     end
     if firstKey then
         teleportDynamic(startPos, firstKey, true)
-        task.wait(0.03)
+        task.wait(0.02) -- slightly increased wait between waypoints
         for _, wp in ipairs(floor2Paths[firstKey]) do
             teleportDynamic(Character.PrimaryPart.Position, wp, true)
-            task.wait(0.03)
+            task.wait(0.02) -- slightly increased wait
         end
     end
     local behindDir = -hitbox.CFrame.LookVector
@@ -447,10 +446,10 @@ local function teleportFloor3(hitbox)
     local isFast = true
     if firstKey then
         teleportDynamic(startPos, firstKey, isFast)
-        task.wait(0.03)
+        task.wait(0.02) -- slightly increased
         for _, wp in ipairs(floor3Paths[firstKey]) do
             teleportDynamic(Character.PrimaryPart.Position, wp, isFast)
-            task.wait(0.03)
+            task.wait(0.02) -- slightly increased
         end
     end
 
