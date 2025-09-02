@@ -226,14 +226,38 @@ if LocalPlayer.Character then newCharacter(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(newCharacter)
 
 -- Predefined positions / paths (kept from original)
-local closestPositions = { Vector3.new(-457, -8, -100), Vector3.new(-457, -8, 7), Vector3.new(-456, -8, 114), Vector3.new(-456, -8, 221), Vector3.new(-363, -8, 221), Vector3.new(-364, -8, 112), Vector3.new(-365, -8, 4), Vector3.new(-364, -8, -103) }
+local closestPositions = {
+    Vector3.new(-457, -8, -100), Vector3.new(-457, -8, 7), Vector3.new(-456, -8, 114), Vector3.new(-456, -8, 221), Vector3.new(-363, -8, 221), Vector3.new(-364, -8, 112), Vector3.new(-365, -8, 4), Vector3.new(-364, -8, -103)
+}
 
-local floor2Paths = { [Vector3.new(-512, 13, 236)] = {Vector3.new(-519, 13, 190), Vector3.new(-466, 13, 186)}, [Vector3.new(-512, 13, 128)] = {Vector3.new(-518, 13, 84),  Vector3.new(-468, 13, 79)}, [Vector3.new(-511, 13, 22)]  = {Vector3.new(-519, 13, -24), Vector3.new(-468, 13, -27)}, [Vector3.new(-511, 13, -84)] = {Vector3.new(-519, 13, -132), Vector3.new(-471, 13, -132)}, [Vector3.new(-308, 13, -118)] = {Vector3.new(-302, 13, -69),  Vector3.new(-351, 13, -68)}, [Vector3.new(-308, 13, -10)]  = {Vector3.new(-303, 13, 36),   Vector3.new(-351, 13, 38)}, [Vector3.new(-308, 13, 96)]   = {Vector3.new(-302, 13, 144),  Vector3.new(-350, 13, 146)}, [Vector3.new(-309, 13, 204)]  = {Vector3.new(-302, 13, 250),  Vector3.new(-362, 13, 252)} }
+local floor2Paths = {
+    [Vector3.new(-512, 13, 236)] = {Vector3.new(-519, 13, 190), Vector3.new(-466, 13, 186)},
+    [Vector3.new(-512, 13, 128)] = {Vector3.new(-518, 13, 84),  Vector3.new(-468, 13, 79)},
+    [Vector3.new(-511, 13, 22)]  = {Vector3.new(-519, 13, -24), Vector3.new(-468, 13, -27)},
+    [Vector3.new(-511, 13, -84)] = {Vector3.new(-519, 13, -132), Vector3.new(-471, 13, -132)},
+    [Vector3.new(-308, 13, -118)] = {Vector3.new(-302, 13, -69),  Vector3.new(-351, 13, -68)},
+    [Vector3.new(-308, 13, -10)]  = {Vector3.new(-303, 13, 36),   Vector3.new(-351, 13, 38)},
+    [Vector3.new(-308, 13, 96)]   = {Vector3.new(-302, 13, 144),  Vector3.new(-350, 13, 146)},
+    [Vector3.new(-309, 13, 204)]  = {Vector3.new(-302, 13, 250),  Vector3.new(-362, 13, 252)}
+}
 
-local floor3Paths = { [Vector3.new(-303, 30, -101)] = {Vector3.new(-303, 13, -101), Vector3.new(-303, 13, -69), Vector3.new(-356, 13, -69)}, [Vector3.new(-304, 30, 6)]    = {Vector3.new(-304, 13, 6),    Vector3.new(-302, 13, 36),  Vector3.new(-355, 13, 40)}, [Vector3.new(-304, 30, 113)]  = {Vector3.new(-304, 13, 113),  Vector3.new(-303, 13, 144), Vector3.new(-350, 13, 146)}, [Vector3.new(-304, 30, 220)]  = {Vector3.new(-304, 13, 220),  Vector3.new(-301, 13, 251), Vector3.new(-351, 13, 251)}, [Vector3.new(-516, 13, 220)]  = {Vector3.new(-516, 30, 220),  Vector3.new(-518, 13, 188), Vector3.new(-470, 13, 189)}, [Vector3.new(-516, 30, 113)]  = {Vector3.new(-516, 13, 113),  Vector3.new(-518, 13, 83),  Vector3.new(-470, 13, 82)}, [Vector3.new(-517, 30, 6)]    = {Vector3.new(-517, 13, 6),    Vector3.new(-518, 13, -24), Vector3.new(-470, 13, -26)}, [Vector3.new(-516, 30, -101)] = {Vector3.new(-516, 13, -101), Vector3.new(-518, 13, -131), Vector3.new(-467, 13, -133)} }
+local floor3Paths = {
+    [Vector3.new(-303, 30, -101)] = {Vector3.new(-303, 13, -101), Vector3.new(-303, 13, -69), Vector3.new(-356, 13, -69)},
+    [Vector3.new(-304, 30, 6)]    = {Vector3.new(-304, 13, 6),    Vector3.new(-302, 13, 36),  Vector3.new(-355, 13, 40)},
+    [Vector3.new(-304, 30, 113)]  = {Vector3.new(-304, 13, 113),  Vector3.new(-303, 13, 144), Vector3.new(-350, 13, 146)},
+    [Vector3.new(-304, 30, 220)]  = {Vector3.new(-304, 13, 220),  Vector3.new(-301, 13, 251), Vector3.new(-351, 13, 251)},
+    [Vector3.new(-516, 13, 220)]  = {Vector3.new(-516, 30, 220),  Vector3.new(-518, 13, 188), Vector3.new(-470, 13, 189)},
+    [Vector3.new(-516, 30, 113)]  = {Vector3.new(-516, 13, 113),  Vector3.new(-518, 13, 83),  Vector3.new(-470, 13, 82)},
+    [Vector3.new(-517, 30, 6)]    = {Vector3.new(-517, 13, 6),    Vector3.new(-518, 13, -24), Vector3.new(-470, 13, -26)},
+    [Vector3.new(-516, 30, -101)] = {Vector3.new(-516, 13, -101), Vector3.new(-518, 13, -131), Vector3.new(-467, 13, -133)}
+}
 
 -- Robust teleport function with slight slow-down and retries for high ping
-local function teleportDynamic(fromPos, toPos, fast)
+-- Modified: will retry the entire teleport up to 2 more times (total 3 attempts) if final placement fails.
+local function teleportDynamic(fromPos, toPos, fast, retryCount)
+    retryCount = retryCount or 0
+    if retryCount > 2 then return end -- don't retry more than 2 extra times
+
     if fast == nil then fast = true end
     if not Character or not Character.PrimaryPart then return end
 
@@ -309,8 +333,23 @@ local function teleportDynamic(fromPos, toPos, fast)
         end
     end
 
+    -- check final success
+    local success = false
+    if Character and Character.PrimaryPart then
+        local cur = Character.PrimaryPart.Position
+        if (Vector3.new(cur.X, toPos.Y, cur.Z) - Vector3.new(toPos.X, toPos.Y, toPos.Z)).Magnitude <= 3 then
+            success = true
+        end
+    end
+
     -- disable align helper after teleport to return control
     AlignHelper.Enabled = false
+
+    -- if teleport failed and we still have retries left, try again (up to 2 retries)
+    if not success and retryCount < 2 then
+        task.wait(0.06)
+        teleportDynamic(fromPos, toPos, fast, retryCount + 1)
+    end
 end
 
 -- floor helpers (same logic but using the updated teleportDynamic)
